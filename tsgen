@@ -1,0 +1,27 @@
+#!/bin/bash
+# THIS SCRIPT REQUIRES GITGEN IN THE SAME FOLDER! It does the following:
+# 1) Runs gitgen - "This script generates a new folder with a Git repository initialised in and a README.md with the folder name/description."
+# 2) Creates a package.json with the description, package name, license and author. The GitHub username is used with the project name to create the GitHub URL in the package.json.
+# 3) Sets up a generic tsconfig.json.
+# 4) Add a "Hello World!" demo file.
+# 5) Build the demo file.
+
+DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd)"
+
+if [ -f "$DIR/gitgen" ]; then
+    if [ $# -eq 5 ]; then
+        /bin/sh "$DIR/gitgen" "$1" "$2"
+        cd $1
+        printf "node_modules/\ndist/\n.DS_Store" > ./.gitignore
+        printf "{\n    \"compilerOptions\": {\n        \"module\": \"commonjs\",\n        \"target\": \"es2018\",\n        \"outDir\": \"./dist\",\n        \"noImplicitAny\": true,\n        \"strict\": true\n    },\n    \"include\": [\n        \"src/**/*\"\n    ]\n}" > ./tsconfig.json
+        echo "{\"name\":\"$1\",\"version\":\"1.0.0\",\"description\":\"$2\",\"main\":\"./dist/index.js\",\"author\":\"$4\",\"license\":\"$5\",\"repository\":{\"type\":\"git\",\"url\":\"git://github.com/$3/$1.git\"},\"scripts\":{\"build\":\"tsc\"}}" > ./package.json
+        mkdir ./src
+        echo "console.log(\"Hello World!\")" > ./src/index.ts
+        npm i --save-dev typescript
+        npm run build
+    else
+        echo "Invalid argument count - <package name> <description> <github username> <author> <license>"
+    fi
+else
+    echo "Expecting to find gitgen in the same folder as this script ($DIR) - I didn't!"
+fi

@@ -1,0 +1,11 @@
+#!/bin/sh
+# This script generates a new folder with a Git repository initialised in and a README.md with the folder name/description.
+
+if [ $# -ne 2 ]; then
+    echo "You did not provide a folder/description."
+else
+    mkdir $1
+    cd $1
+    git init
+    echo "# $1\n$2" > ./README.md
+fi
